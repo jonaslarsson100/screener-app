@@ -1,0 +1,860 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EEF1F4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#12171D" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #EEF1F4; --surface: #FFFFFF; --sunk: #E3E8ED; --ink: #1B2430; --muted: #66717F;
+  --line: #D5DCE3; --gain: #1F7A4D; --gain-bg: #E1F1E8; --loss: #B4372B; --loss-bg: #F8E3E0;
+  --hot: #B57F00; --hot-bg: #FBF0D2; --focus: #2F5D9A; --rail: #CBD3DB;
+  --radius-s: 6px; --radius-l: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12171D; --surface: #1A2129; --sunk: #232C36; --ink: #E6EBF0; --muted: #8B96A3;
+    --line: #2C3641; --gain: #4CC38A; --gain-bg: #18342A; --loss: #F0715F; --loss-bg: #3A2220;
+    --hot: #F2B53A; --hot-bg: #3A2F14; --focus: #7FA8E0; --rail: #3A4552;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--ink);
+  font: 400 15px/1.45 "IBM Plex Sans", system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: calc(76px + env(safe-area-inset-bottom));
+}
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.wrap { max-width: 640px; margin: 0 auto; padding: 0 16px; }
+
+/* Header */
+header { position: sticky; top: 0; z-index: 5; background: var(--bg); padding-top: env(safe-area-inset-top); }
+.bar { display: flex; align-items: center; gap: 8px; height: 56px; }
+.bar h1 { font-size: 20px; font-weight: 600; margin: 0; flex: 1; letter-spacing: -0.01em; }
+.updated { color: var(--muted); font-size: 13px; }
+.icon-btn { width: 40px; height: 40px; border-radius: 50%; border: 0; background: transparent; display: grid; place-items: center; cursor: pointer; color: var(--muted); }
+.icon-btn:hover { background: var(--sunk); color: var(--ink); }
+.icon-btn svg { width: 22px; height: 22px; }
+.spin svg { animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Tabs */
+nav.tabs { position: fixed; bottom: 0; left: 0; right: 0; z-index: 6; background: var(--surface); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
+nav.tabs .wrap { display: grid; grid-template-columns: repeat(4, 1fr); }
+nav.tabs button { border: 0; background: none; height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 12px; color: var(--muted); cursor: pointer; position: relative; }
+nav.tabs button svg { width: 22px; height: 22px; }
+nav.tabs button[aria-selected="true"] { color: var(--ink); font-weight: 500; }
+nav.tabs .dot { position: absolute; top: 9px; left: calc(50% + 8px); min-width: 16px; height: 16px; border-radius: 8px; background: var(--hot); color: #fff; font-size: 10px; font-weight: 600; display: grid; place-items: center; padding: 0 4px; }
+
+/* Summary */
+.summary { padding: 8px 0 20px; }
+.total { font-size: 34px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+.total small { font-size: 18px; font-weight: 500; color: var(--muted); margin-left: 4px; }
+.figures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px 12px; margin-top: 12px; }
+.figures dt { color: var(--muted); font-size: 13px; }
+.figures dd { margin: 0; font-weight: 500; }
+.spark { margin-top: 14px; }
+.spark svg { width: 100%; height: 56px; display: block; }
+.spark p { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
+
+.gain { color: var(--gain); } .loss { color: var(--loss); }
+
+h2 { font-size: 15px; font-weight: 600; margin: 24px 0 10px; display: flex; align-items: baseline; gap: 8px; }
+h2 .count { color: var(--muted); font-weight: 400; }
+
+/* Buttons */
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius-s); padding: 9px 14px; cursor: pointer; font-weight: 500; font-size: 14px; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.btn.primary:hover { opacity: .9; }
+.btn.sell { color: var(--loss); }
+.btn.wide { width: 100%; padding: 12px; font-size: 15px; }
+.btn:disabled { opacity: .5; cursor: default; }
+.link { border: 0; background: none; color: var(--focus); padding: 0; cursor: pointer; font-weight: 500; }
+
+/* Position */
+.pos { background: var(--surface); border-radius: var(--radius-l); padding: 14px 16px 12px; margin-bottom: 10px; }
+.pos-top { display: flex; justify-content: space-between; gap: 12px; }
+.pos-name { font-weight: 600; font-size: 16px; }
+.strat { display: inline-block; font-size: 12px; font-weight: 500; padding: 1px 8px; border-radius: 10px; margin-left: 6px; vertical-align: 2px; white-space: nowrap; }
+.strat-momentum { background: var(--hot-bg); color: var(--hot); }
+.strat-pullback { background: var(--gain-bg); color: var(--gain); }
+.strat-turtle { background: var(--sunk); color: var(--ink); }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-s); padding: 3px; }
+.seg button { border: 0; background: transparent; min-height: 38px; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 13px; color: var(--muted); padding: 4px; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 12px; }
+.chip { border: 1px solid var(--line); background: transparent; border-radius: 16px; padding: 4px 12px; font-size: 13px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.cmp { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--surface); border-radius: var(--radius-l); overflow: hidden; }
+.cmp th, .cmp td { padding: 9px 10px; text-align: right; border-bottom: 1px solid var(--line); }
+.cmp th:first-child, .cmp td:first-child { text-align: left; }
+.cmp th { color: var(--muted); font-weight: 500; }
+.cmp tr:last-child td { border-bottom: 0; }
+.pos-sub { color: var(--muted); font-size: 13px; }
+.pos-pl { text-align: right; }
+.pos-pl b { display: block; font-size: 16px; font-weight: 600; }
+.pos-actions { display: flex; gap: 8px; margin-top: 12px; }
+.pos-actions .btn { flex: 1; padding: 7px 8px; }
+
+/* Stop–target rail: the one bold element */
+.rail { margin: 16px 0 4px; position: relative; height: 34px; }
+.rail-track { position: absolute; top: 12px; left: 0; right: 0; height: 8px; border-radius: 4px;
+  background: linear-gradient(90deg, var(--loss-bg), var(--sunk) 45%, var(--gain-bg)); }
+.rail-fill { position: absolute; top: 12px; height: 8px; border-radius: 4px; }
+.rail-gav { position: absolute; top: 8px; width: 2px; height: 16px; background: var(--muted); border-radius: 1px; }
+.rail-now { position: absolute; top: 6px; width: 20px; height: 20px; margin-left: -10px; border-radius: 50%; background: var(--surface); border: 3px solid var(--ink); }
+.rail-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+.rail-labels span:last-child { text-align: right; }
+.rail-labels b { color: var(--ink); font-weight: 500; }
+.rail-note { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.rail.over .rail-now { border-color: var(--gain); }
+.rail.under .rail-now { border-color: var(--loss); }
+
+/* Lists */
+.list { background: var(--surface); border-radius: var(--radius-l); overflow: hidden; }
+.row { padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.row:last-child { border-bottom: 0; }
+.row-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.row-title { font-weight: 600; }
+.row-time { color: var(--muted); font-size: 13px; white-space: nowrap; }
+.row-body { white-space: pre-line; color: var(--muted); font-size: 14px; margin-top: 4px; }
+.row-actions { margin-top: 10px; display: flex; gap: 8px; }
+.row.ev { border-left: 4px solid transparent; }
+.ev-buy { border-left-color: var(--gain) !important; }
+.ev-sell { border-left-color: var(--loss) !important; }
+.ev-target { border-left-color: var(--focus) !important; }
+.ev-hot_swing { border-left-color: var(--hot) !important; }
+.day-head { color: var(--muted); font-size: 13px; margin: 20px 0 8px; }
+
+/* Watch */
+.watch-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; font-size: 13px; }
+.watch-meta dt { color: var(--muted); }
+.watch-meta dd { margin: 0; font-weight: 500; }
+.dist { font-size: 13px; margin-top: 8px; }
+.meter { height: 4px; border-radius: 2px; background: var(--sunk); margin-top: 6px; overflow: hidden; }
+.meter i { display: block; height: 100%; background: var(--hot); border-radius: 2px; }
+.status { font-size: 12px; font-weight: 500; padding: 1px 7px; border-radius: 10px; background: var(--sunk); color: var(--muted); }
+.status.triggered { background: var(--gain-bg); color: var(--gain); }
+
+/* History */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border-radius: var(--radius-l); overflow: hidden; }
+.stats div { background: var(--surface); padding: 12px; }
+.stats dt { color: var(--muted); font-size: 12px; }
+.stats dd { margin: 2px 0 0; font-weight: 600; font-size: 16px; }
+details.report summary { cursor: pointer; padding: 12px 16px; list-style: none; display: flex; justify-content: space-between; }
+details.report summary::-webkit-details-marker { display: none; }
+details.report pre { white-space: pre-wrap; font: inherit; font-size: 14px; color: var(--muted); margin: 0; padding: 0 16px 14px; }
+details.report { border-bottom: 1px solid var(--line); }
+details.report:last-child { border-bottom: 0; }
+
+/* Empty + notices */
+.empty { text-align: center; padding: 36px 20px; color: var(--muted); }
+.empty p { margin: 0 0 14px; }
+.notice { background: var(--hot-bg); color: var(--ink); border-radius: var(--radius-s); padding: 12px 14px; font-size: 14px; margin: 8px 0 16px; }
+.notice.err { background: var(--loss-bg); }
+
+/* Sheet */
+.scrim { position: fixed; inset: 0; background: rgba(10, 15, 20, .45); z-index: 20; display: none; align-items: flex-end; justify-content: center; }
+.scrim.open { display: flex; }
+.sheet { background: var(--surface); width: 100%; max-width: 640px; border-radius: 18px 18px 0 0; padding: 8px 16px calc(20px + env(safe-area-inset-bottom)); max-height: 92vh; overflow-y: auto; animation: rise .22s ease-out; }
+@keyframes rise { from { transform: translateY(24px); opacity: .6; } }
+@media (prefers-reduced-motion: reduce) { .sheet { animation: none; } .spin svg { animation: none; } }
+.grab { width: 36px; height: 4px; border-radius: 2px; background: var(--line); margin: 4px auto 12px; }
+.sheet h3 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+.sheet .lead { color: var(--muted); margin: 0 0 16px; font-size: 14px; }
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 5px; }
+.field input, .field select { width: 100%; height: 46px; border: 1px solid var(--line); border-radius: var(--radius-s); background: var(--bg); padding: 0 12px; font-size: 16px; }
+.field input:focus { border-color: var(--focus); outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 25%, transparent); }
+.field .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.cols > * { min-width: 0; }
+.preview { background: var(--bg); border-radius: var(--radius-s); padding: 10px 12px; font-size: 14px; margin: 4px 0 16px; }
+.preview div { display: flex; justify-content: space-between; }
+.sheet-actions { display: flex; gap: 10px; }
+.sheet-actions .btn { flex: 1; padding: 12px; }
+.danger-zone { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+
+.toast { position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 20px; font-size: 14px; z-index: 30; display: none; max-width: calc(100% - 32px); }
+.toast.show { display: block; }
+.toast.err { background: var(--loss); color: #fff; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <h1 id="title">Portfolio</h1>
+    <span class="updated" id="updated"></span>
+    <button class="icon-btn" id="refresh" aria-label="Uppdatera">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg>
+    </button>
+    <button class="icon-btn" id="openSettings" aria-label="Inställningar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="wrap" id="main"></main>
+
+<nav class="tabs" aria-label="Vyer">
+  <div class="wrap" role="tablist">
+    <button role="tab" data-tab="portfolio" aria-selected="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 17l5-5 4 4 8-8M15 8h5v5"/></svg>Portfolio</button>
+    <button role="tab" data-tab="signals" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>Signaler<span class="dot" id="sigDot" hidden></span></button>
+    <button role="tab" data-tab="watch" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>Bevakning<span class="dot" id="watchDot" hidden></span></button>
+    <button role="tab" data-tab="history" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18M7 15l3-3 3 2 5-6"/></svg>Historik</button>
+  </div>
+</nav>
+
+<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true" id="sheet"></div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+"use strict";
+/* =====================================================================
+   Konfiguration (sparas bara i den här webbläsaren)
+   ===================================================================== */
+const CFG_KEY = "screener.cfg";
+const cfg = Object.assign({ owner: "", repo: "", token: "", branch: "data", api: "https://api.github.com", fee: 0 },
+  safeJSON(lsGet(CFG_KEY)) || {});
+const qs = new URLSearchParams(location.search);
+if (qs.get("api")) cfg.api = qs.get("api");   // för lokal test
+function lsGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch {} }
+function safeJSON(s) { try { return JSON.parse(s); } catch { return null; } }
+function saveCfg() { lsSet(CFG_KEY, JSON.stringify(cfg)); }
+
+/* =====================================================================
+   GitHub-lagring: JSON-filer i grenen "data"
+   ===================================================================== */
+const FILES = ["positions", "events", "watchlist", "prices", "levels", "history", "reports"];
+const DEFAULTS = { positions: { open: [], closed: [] }, events: [], watchlist: { entries: [] },
+  prices: { updated: null, fx: {}, quotes: {} }, levels: {}, history: [], reports: [] };
+let D = structuredClone(DEFAULTS);
+let shas = {};
+let loadError = null;
+
+function b64decode(b64) {
+  const bin = atob(b64.replace(/\n/g, ""));
+  return new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0)));
+}
+function b64encode(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+async function gh(path, opts = {}) {
+  const res = await fetch(`${cfg.api}/repos/${cfg.owner}/${cfg.repo}/contents/${path}`, {
+    ...opts, cache: "no-store",
+    headers: { "Authorization": `Bearer ${cfg.token}`, "Accept": "application/vnd.github+json",
+               "X-GitHub-Api-Version": "2022-11-28", ...(opts.body ? { "Content-Type": "application/json" } : {}) },
+  });
+  return res;
+}
+async function getFile(name) {
+  const res = await gh(`${name}.json?ref=${encodeURIComponent(cfg.branch)}&t=${Date.now()}`);
+  if (res.status === 404) return { data: null, sha: null, missing: true };
+  if (res.status === 401 || res.status === 403) throw new Error("Token saknar behörighet. Kontrollera inställningarna.");
+  if (!res.ok) throw new Error(`GitHub svarade ${res.status} för ${name}.json`);
+  const j = await res.json();
+  return { data: JSON.parse(b64decode(j.content)), sha: j.sha };
+}
+async function putFile(name, data, sha, message) {
+  const body = { message, branch: cfg.branch, content: b64encode(JSON.stringify(data, null, 1) + "\n") };
+  if (sha) body.sha = sha;
+  const res = await gh(`${name}.json`, { method: "PUT", body: JSON.stringify(body) });
+  if (res.status === 409 || res.status === 422) return { conflict: true, status: res.status, text: await res.text() };
+  if (!res.ok) throw new Error(`Kunde inte spara (${res.status}). ${(await res.text()).slice(0, 140)}`);
+  const j = await res.json();
+  return { sha: j.content.sha };
+}
+/* Läser senaste versionen, gör ändringen och sparar. Om boten eller en annan
+   enhet hunnit spara emellan försöker den igen med den nya versionen. */
+async function mutatePositions(fn, message) {
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const cur = await getFile("positions");
+    const data = cur.data || structuredClone(DEFAULTS.positions);
+    fn(data);
+    const r = await putFile("positions", data, cur.sha, message);
+    if (!r.conflict) { D.positions = data; shas.positions = r.sha; return; }
+    if (/Branch .* not found|No commit found for the ref/i.test(r.text || ""))
+      throw new Error("Datagrenen finns inte än. Kör workflowen en gång i GitHub (Actions → Run workflow).");
+  }
+  throw new Error("Kunde inte spara efter flera försök. Försök igen.");
+}
+async function loadAll() {
+  if (!cfg.owner || !cfg.repo || !cfg.token) { loadError = "setup"; return; }
+  const results = await Promise.all(FILES.map(f => getFile(f).catch(e => ({ error: e }))));
+  const err = results.find(r => r.error);
+  if (err) { loadError = err.error.message; return; }
+  loadError = results.every(r => r.missing) ? "nobranch" : null;
+  FILES.forEach((f, i) => { D[f] = results[i].data ?? structuredClone(DEFAULTS[f]); shas[f] = results[i].sha; });
+}
+
+/* =====================================================================
+   Beräkningar – samma logik som portfolio.py
+   ===================================================================== */
+const STRATS = { momentum: "Momentum Breakout", pullback: "Pullback", turtle: "Turtle" };
+const stratOf = x => STRATS[x && x.strategy] ? x.strategy : "momentum";
+const badge = x => `<span class="strat strat-${stratOf(x)}">${STRATS[stratOf(x)]}</span>`;
+const marketOf = t => t.toUpperCase().endsWith(".ST") ? "se" : "us";
+const curOf = t => marketOf(t) === "se" ? "kr" : "$";
+const short = t => t.replace(/\.ST$/i, "");
+function stats(p) {
+  const ev = [...(p.buys || []).map(f => ["buy", f]), ...(p.sells || []).map(f => ["sell", f])]
+    .sort((a, b) => (a[1].time || "").localeCompare(b[1].time || ""));
+  let qty = 0, cost = 0, realized = 0, invested = 0;
+  for (const [k, f] of ev) {
+    const q = +f.qty, pr = +f.price, fee = +(f.fee || 0);
+    if (k === "buy") { qty += q; cost += q * pr + fee; invested += q * pr + fee; }
+    else { const gav = qty ? cost / qty : 0, qq = Math.min(q, qty); realized += qq * (pr - gav) - fee; cost -= gav * qq; qty -= qq; }
+  }
+  return { qty, gav: qty ? cost / qty : 0, realized, invested };
+}
+const fx = () => (D.prices.fx && D.prices.fx.USDSEK) || 0;
+const toSek = (v, t) => marketOf(t) === "us" ? v * fx() : v;
+const quote = t => (D.prices.quotes || {})[t];
+function levelsFor(p) {
+  const lv = D.levels[p.id] || {};
+  return { stop: p.stop_override ?? lv.stop ?? null, target: p.target_override ?? lv.target ?? null,
+           autoStop: lv.stop ?? null, autoTarget: lv.target ?? null };
+}
+
+/* =====================================================================
+   Formatering
+   ===================================================================== */
+const nf = d => new Intl.NumberFormat("sv-SE", { minimumFractionDigits: d, maximumFractionDigits: d });
+const fmt = (x, d = 2) => x == null || isNaN(x) ? "–" : nf(d).format(x);
+const money = (x, cur = "kr", d = 0) => `${fmt(x, d)} ${cur}`;
+const signed = (x, cur = "kr", d = 0) => (x > 0 ? "+" : "") + money(x, cur, d);
+const pct = x => x == null || !isFinite(x) ? "–" : (x > 0 ? "+" : "") + fmt(x * 100, 1) + " %";
+const cls = x => x > 0 ? "gain" : x < 0 ? "loss" : "";
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+function when(iso) {
+  if (!iso) return "";
+  const d = new Date(iso), now = new Date();
+  const t = d.toLocaleTimeString("sv-SE", { hour: "2-digit", minute: "2-digit" });
+  if (d.toDateString() === now.toDateString()) return `idag ${t}`;
+  const y = new Date(now); y.setDate(now.getDate() - 1);
+  if (d.toDateString() === y.toDateString()) return `igår ${t}`;
+  return d.toLocaleDateString("sv-SE", { day: "numeric", month: "short" }) + ` ${t}`;
+}
+const dayLabel = iso => { const w = when(iso); return w.startsWith("idag") ? "Idag" : w.startsWith("igår") ? "Igår" :
+  new Date(iso).toLocaleDateString("sv-SE", { weekday: "long", day: "numeric", month: "long" }); };
+function localNow() { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); }
+const num = v => parseFloat(String(v).replace(/\s/g, "").replace(",", "."));
+
+/* =====================================================================
+   Vyer
+   ===================================================================== */
+let tab = qs.get("tab") || "portfolio";
+let histFilter = "all";
+const main = document.getElementById("main");
+
+function render() {
+  document.querySelectorAll("nav.tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === tab));
+  document.getElementById("title").textContent = { portfolio: "Portfolio", signals: "Signaler", watch: "Bevakning", history: "Historik" }[tab];
+  document.getElementById("updated").textContent = D.prices.updated ? `Kurser ${when(D.prices.updated)}` : "";
+  const today = new Date().toISOString().slice(0, 10);
+  const nBuy = D.events.filter(e => e.type === "buy" && e.time.slice(0, 10) === today && !registered(e)).length;
+  const nWatch = activeWatch().length;
+  setDot("sigDot", nBuy); setDot("watchDot", nWatch);
+
+  if (loadError === "setup") { main.innerHTML = setupView(); return; }
+  const notice = loadError === "nobranch"
+    ? `<div class="notice">Ingen data än. Kör workflowen en gång i GitHub (Actions → Aktiescreener → Run workflow), sedan fylls allt på här.</div>`
+    : loadError ? `<div class="notice err">${esc(loadError)}</div>` : "";
+  main.innerHTML = notice + ({ portfolio: portfolioView, signals: signalsView, watch: watchView, history: historyView }[tab])();
+}
+function setDot(id, n) { const el = document.getElementById(id); el.hidden = !n; el.textContent = n; }
+
+function setupView() {
+  return `<div class="empty"><p>Koppla appen till ditt GitHub-repo för att se innehav och registrera köp.</p>
+    <button class="btn primary" data-act="settings">Koppla repo</button></div>`;
+}
+
+/* ---------- Portfolio ---------- */
+function openPositions() { return (D.positions.open || []).filter(p => stats(p).qty > 0); }
+function portfolioView() {
+  const pos = openPositions();
+  let value = 0, cost = 0, dayChg = 0;
+  const today = new Date().toISOString().slice(0, 10);
+  for (const p of pos) {
+    const s = stats(p), q = quote(p.ticker); if (!q) continue;
+    value += toSek(s.qty * q.price, p.ticker); cost += toSek(s.qty * s.gav, p.ticker);
+    const base = (p.buys[0].time || "").slice(0, 10) === today ? s.gav : q.prev_close;
+    dayChg += toSek(s.qty * (q.price - base), p.ticker);
+  }
+  const all = [...(D.positions.open || []), ...(D.positions.closed || [])];
+  const realized = all.reduce((a, p) => a + toSek(stats(p).realized, p.ticker), 0);
+  const invested = all.reduce((a, p) => a + toSek(stats(p).invested, p.ticker), 0);
+  const unreal = value - cost, total = realized + unreal;
+
+  const summary = pos.length || all.length ? `
+    <section class="summary">
+      <div class="total">${fmt(value, 0)}<small>kr</small></div>
+      <dl class="figures">
+        <div><dt>Idag</dt><dd class="${cls(dayChg)}">${signed(dayChg)}</dd></div>
+        <div><dt>Orealiserat</dt><dd class="${cls(unreal)}">${pct(cost ? unreal / cost : 0)}</dd></div>
+        <div><dt>Totalt resultat</dt><dd class="${cls(total)}">${signed(total)}</dd></div>
+      </dl>
+      ${sparkline()}
+    </section>` : "";
+
+  const cards = pos.length ? pos.map(positionCard).join("") :
+    `<div class="empty"><p>Inga öppna innehav. När du köpt något på en köpsignal registrerar du det här, så bevakas stop och target automatiskt.</p></div>`;
+  return `${summary}
+    <h2>Innehav <span class="count">${pos.length || ""}</span></h2>
+    ${cards}
+    <button class="btn wide" data-act="buy">Registrera köp</button>`;
+}
+function sparkline() {
+  const h = (D.history || []).slice(-90);
+  if (h.length < 2) return "";
+  const ys = h.map(r => r.total_result_sek), min = Math.min(...ys, 0), max = Math.max(...ys, 0);
+  const W = 600, H = 56, span = max - min || 1;
+  const pts = ys.map((y, i) => `${(i / (ys.length - 1) * W).toFixed(1)},${(H - 4 - (y - min) / span * (H - 8)).toFixed(1)}`);
+  const zero = (H - 4 - (0 - min) / span * (H - 8)).toFixed(1);
+  const last = ys[ys.length - 1];
+  return `<div class="spark"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="Totalt resultat över tid">
+      <line x1="0" x2="${W}" y1="${zero}" y2="${zero}" stroke="var(--line)" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>
+      <polyline points="${pts.join(" ")}" fill="none" stroke="${last >= 0 ? "var(--gain)" : "var(--loss)"}" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+    </svg><p>Totalt resultat, senaste ${h.length} handelsdagarna</p></div>`;
+}
+function positionCard(p) {
+  const s = stats(p), q = quote(p.ticker), cur = curOf(p.ticker);
+  const price = q ? q.price : s.gav;
+  const unr = s.qty * (price - s.gav), unrPct = price / s.gav - 1;
+  const { stop, target } = levelsFor(p);
+  return `<article class="pos">
+    <div class="pos-top">
+      <div>
+        <div class="pos-name">${esc(p.name || short(p.ticker))}${badge(p)}</div>
+        <div class="pos-sub">${fmt(s.qty, 0)} st à ${fmt(s.gav)} ${cur}${q ? `, nu ${fmt(price)} <span class="${cls(q.change)}">${pct(q.change)}</span>` : ""}</div>
+      </div>
+      <div class="pos-pl ${cls(unr)}"><b>${signed(unr, cur)}</b>${pct(unrPct)}</div>
+    </div>
+    ${rail(price, s.gav, stop, target, cur)}
+    <div class="pos-actions">
+      <button class="btn sell" data-act="sell" data-id="${esc(p.id)}">Sälj</button>
+      <button class="btn" data-act="buymore" data-id="${esc(p.id)}">Köp mer</button>
+      <button class="btn" data-act="edit" data-id="${esc(p.id)}">Ändra</button>
+    </div>
+  </article>`;
+}
+function rail(price, gav, stop, target, cur) {
+  if (stop == null || target == null || target <= stop)
+    return `<p class="rail-note">Stop och target räknas fram vid botens nästa körning.</p>`;
+  const lo = stop, hi = target, span = hi - lo;
+  const pos = x => Math.min(Math.max((x - lo) / span, 0), 1) * 100;
+  const now = pos(price), g = pos(gav);
+  const state = price >= target ? "over" : price <= stop ? "under" : "";
+  const fill = price >= gav
+    ? `left:${g}%;width:${now - g}%;background:var(--gain)`
+    : `left:${now}%;width:${g - now}%;background:var(--loss)`;
+  const note = state === "over" ? "Över target." : state === "under" ? "Under stop – säljsignal." :
+    `${pct(target / price - 1)} till target, ${pct(stop / price - 1)} till stop`;
+  return `<div class="rail ${state}" role="img" aria-label="Kurs ${fmt(price)} mellan stop ${fmt(stop)} och target ${fmt(target)}">
+      <div class="rail-track"></div><div class="rail-fill" style="${fill}"></div>
+      <div class="rail-gav" style="left:${g}%" title="GAV"></div><div class="rail-now" style="left:${now}%"></div>
+    </div>
+    <div class="rail-labels"><span>Stop <b>${fmt(stop)}</b></span><span>Target <b>${fmt(target)}</b></span></div>
+    <div class="rail-note">${note}</div>`;
+}
+
+/* ---------- Signaler ---------- */
+const registered = e => [...(D.positions.open || []), ...(D.positions.closed || [])].some(p => p.signal_id === e.id);
+function signalsView() {
+  const ev = D.events || [];
+  if (!ev.length) return `<div class="empty"><p>Inga signaler än. Notiser du får visas också här, så att du kan registrera köp och sälj i efterhand.</p></div>`;
+  let html = "", lastDay = "";
+  for (const e of ev.slice(0, 150)) {
+    const d = dayLabel(e.time);
+    if (d !== lastDay) { html += (lastDay ? "</div>" : "") + `<div class="day-head">${esc(d)}</div><div class="list">`; lastDay = d; }
+    html += `<div class="row ev ev-${esc(e.type)}">
+      <div class="row-head"><span class="row-title">${esc(e.title)}</span><span class="row-time">${esc(when(e.time).replace(/^(idag|igår) /, ""))}</span></div>
+      <div class="row-body">${esc(e.body)}</div>${eventActions(e)}</div>`;
+  }
+  return html + "</div>";
+}
+function eventActions(e) {
+  if (e.type === "buy" && e.add) {
+    const p = openPositions().find(x => x.id === e.pos_id);
+    if (!p) return "";
+    if ((p.buys || []).some(b => b.signal_id === e.id)) return `<div class="row-actions"><span class="status triggered">Påfyllning registrerad</span></div>`;
+    return `<div class="row-actions"><button class="btn primary" data-act="addevent" data-id="${esc(e.id)}">Registrera påfyllning</button></div>`;
+  }
+  if (e.type === "buy") {
+    if (registered(e)) return `<div class="row-actions"><span class="status triggered">Köp registrerat</span></div>`;
+    return `<div class="row-actions"><button class="btn primary" data-act="buyevent" data-id="${esc(e.id)}">Registrera köp</button></div>`;
+  }
+  if ((e.type === "sell" || e.type === "target") && e.pos_id && openPositions().some(p => p.id === e.pos_id))
+    return `<div class="row-actions"><button class="btn sell" data-act="sell" data-id="${esc(e.pos_id)}" data-price="${e.price}">Registrera sälj</button></div>`;
+  return "";
+}
+
+/* ---------- Bevakning ---------- */
+const activeWatch = () => (D.watchlist.entries || []).filter(e => e.status === "watching");
+function watchView() {
+  const act = activeWatch();
+  const recent = (D.watchlist.entries || []).filter(e => e.status !== "watching")
+    .sort((a, b) => (b.triggered_at || b.added).localeCompare(a.triggered_at || a.added)).slice(0, 25);
+  const block = (title, list, empty) => `<h2>${title} <span class="count">${list.length || ""}</span></h2>` +
+    (list.length ? `<div class="list">${list.map(watchRow).join("")}</div>` : `<p class="empty" style="padding:12px 0">${empty}</p>`);
+  return block("Hot Swing", act, "Inga kandidater just nu. Screenern letar efter varje börsstängning.") +
+    (recent.length ? `<h2>Senaste 30 dagarna</h2><div class="list">${recent.map(watchRow).join("")}</div>` : "");
+}
+function watchRow(e) {
+  const q = quote(e.ticker), cur = curOf(e.ticker), price = q ? q.price : e.price;
+  const statusTxt = { watching: "", triggered: "Köpsignal", expired: "Utgången", invalidated: "Bruten" }[e.status];
+  const dist = e.trigger / price - 1;
+  const progress = Math.max(0, Math.min(1, (price - e.stop) / (e.trigger - e.stop)));
+  return `<div class="row ev ev-hot_swing">
+    <div class="row-head"><span class="row-title">${esc(e.name)}${badge(e)}</span>
+      ${statusTxt ? `<span class="status ${e.status}">${statusTxt}</span>` : `<span class="row-time">${esc(when(e.added))}</span>`}</div>
+    <div class="row-body">${esc((e.reasons || []).join(", "))}</div>
+    <dl class="watch-meta">
+      <div><dt>Köp över</dt><dd>${fmt(e.trigger)}</dd></div>
+      <div><dt>Stop</dt><dd>${fmt(e.stop)}</dd></div>
+      <div><dt>Target</dt><dd>${fmt(e.target)}</dd></div>
+    </dl>
+    ${e.status === "watching" ? `<div class="dist">Kurs ${fmt(price)} ${cur}, ${dist > 0 ? `${pct(dist)} kvar till köpnivån` : "över köpnivån"}. Bevakas till ${esc(e.expires)}</div>
+      <div class="meter"><i style="width:${(progress * 100).toFixed(0)}%"></i></div>` : ""}
+  </div>`;
+}
+
+/* ---------- Historik ---------- */
+function closedStats(list) {
+  const res = list.map(p => { const s = stats(p); return { p, s, r: toSek(s.realized, p.ticker), ret: s.realized / s.invested }; });
+  const wins = res.filter(x => x.r > 0), losses = res.filter(x => x.r <= 0);
+  const sum = a => a.reduce((t, x) => t + x.r, 0);
+  return { res, wins, losses, sum, total: sum(res),
+    winRate: res.length ? wins.length / res.length : null,
+    avgWin: wins.length ? sum(wins) / wins.length : null,
+    avgLoss: losses.length ? sum(losses) / losses.length : null,
+    pf: losses.length && sum(losses) ? sum(wins) / Math.abs(sum(losses)) : (wins.length ? Infinity : null),
+    avgDays: res.length ? res.reduce((t, x) => t + (new Date(x.p.closed) - new Date(x.p.buys[0].time)) / 864e5, 0) / res.length : null };
+}
+function historyView() {
+  const all = D.positions.closed || [];
+  const list = all.filter(p => histFilter === "all" || stratOf(p) === histFilter);
+  const st = closedStats(list);
+  const pfTxt = x => x == null ? "–" : x === Infinity ? "∞" : fmt(x, 2);
+  const statsHtml = `<dl class="stats">
+    <div><dt>Realiserat</dt><dd class="${cls(st.total)}">${signed(st.total)}</dd></div>
+    <div><dt>Avslutade</dt><dd>${st.res.length}</dd></div>
+    <div><dt>Vinnare</dt><dd>${st.winRate != null ? fmt(st.winRate * 100, 0) + " %" : "–"}</dd></div>
+    <div><dt>Snittvinst</dt><dd class="gain">${st.avgWin != null ? signed(st.avgWin) : "–"}</dd></div>
+    <div><dt>Snittförlust</dt><dd class="loss">${st.avgLoss != null ? signed(st.avgLoss) : "–"}</dd></div>
+    <div><dt>Profit factor</dt><dd>${pfTxt(st.pf)}</dd></div>
+  </dl>
+  <p class="rail-note" style="margin-top:8px">${st.avgDays != null ? `Snittinnehav ${fmt(st.avgDays, 1)} dagar. ` : ""}Profit factor är vinsterna delat med förlusterna; över 1 betyder att strategin tjänar pengar.</p>`;
+  const per = Object.keys(STRATS).map(k => [k, closedStats(all.filter(p => stratOf(p) === k))]).filter(([, x]) => x.res.length);
+  const cmp = per.length > 1 || (per.length === 1 && histFilter === "all" && all.length) ? `<h2>Per strategi</h2>
+    <table class="cmp"><thead><tr><th>Strategi</th><th>Affärer</th><th>Vinnare</th><th>Profit factor</th><th>Resultat</th></tr></thead><tbody>
+    ${per.map(([k, x]) => `<tr><td>${STRATS[k]}</td><td>${x.res.length}</td><td>${fmt(x.winRate * 100, 0)} %</td><td>${pfTxt(x.pf)}</td><td class="${cls(x.total)}">${signed(x.total)}</td></tr>`).join("")}
+    </tbody></table>` : "";
+  const chips = `<div class="chips" role="group" aria-label="Visa strategi">${[["all", "Alla"], ...Object.entries(STRATS)]
+    .map(([k, l]) => `<button class="chip" data-filter="${k}" aria-pressed="${histFilter === k}">${l}</button>`).join("")}</div>`;
+  const rows = st.res.sort((a, b) => (b.p.closed || "").localeCompare(a.p.closed || "")).map(({ p, s, ret }) => `
+    <div class="row"><div class="row-head">
+      <span class="row-title">${esc(p.name || short(p.ticker))}${badge(p)}</span>
+      <span class="${cls(s.realized)}" style="font-weight:600">${signed(s.realized, curOf(p.ticker))}</span></div>
+      <div class="row-head" style="margin-top:2px"><span class="row-time">${esc(when(p.buys[0].time))} – ${esc(when(p.closed))}</span>
+      <span class="${cls(ret)}" style="font-size:13px">${pct(ret)}</span></div></div>`).join("");
+  const reports = (D.reports || []).slice(0, 30).map(r => `<details class="report"><summary><span>${esc(dayLabel(r.date + "T18:00"))}</span><span class="row-time">${r.market === "us" ? "USA" : "Sverige"}</span></summary><pre>${esc(r.body)}</pre></details>`).join("");
+  return `<div style="height:8px"></div>${chips}${statsHtml}${cmp}<h2>Affärer</h2>
+    ${rows ? `<div class="list">${rows}</div>` : `<p class="empty">Inga avslutade affärer ${histFilter === "all" ? "än" : "med den strategin än"}. När du säljer hela innehavet hamnar det här.</p>`}
+    ${reports ? `<h2>Dagsrapporter</h2><div class="list">${reports}</div>` : ""}`;
+}
+
+/* =====================================================================
+   Formulär (bottenark)
+   ===================================================================== */
+const scrim = document.getElementById("scrim"), sheet = document.getElementById("sheet");
+function openSheet(html, onMount) {
+  sheet.innerHTML = `<div class="grab"></div>${html}`;
+  scrim.classList.add("open");
+  onMount && onMount(sheet);
+  const first = sheet.querySelector("input:not([type=hidden]), select, button.primary");
+  first && setTimeout(() => first.focus(), 60);
+}
+function closeSheet() { scrim.classList.remove("open"); sheet.innerHTML = ""; }
+scrim.addEventListener("click", e => { if (e.target === scrim) closeSheet(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && scrim.classList.contains("open")) closeSheet(); });
+
+const field = (id, label, value = "", attrs = "", hint = "") =>
+  `<div class="field"><label for="${id}">${label}</label><input id="${id}" value="${esc(value)}" ${attrs}>${hint ? `<div class="hint">${hint}</div>` : ""}</div>`;
+const numAttrs = `inputmode="decimal" autocomplete="off"`;
+
+function buySheet({ ticker = "", name = "", price = "", atr = null, event = null, posId = null,
+                    strategy = null, stop = null, target = null, qty = null, addEvent = null } = {}) {
+  const pos = posId && D.positions.open.find(p => p.id === posId);
+  const ev = event && D.events.find(e => e.id === event);
+  if (pos) ({ ticker, name } = { ticker: pos.ticker, name: pos.name });
+  if (ev) { strategy = strategy || ev.strategy; stop = stop ?? ev.stop; target = target ?? ev.target; qty = qty ?? ev.qty; }
+  let k = STRATS[strategy] ? strategy : "momentum";
+  const q = ticker && quote(ticker);
+  if (!price && q) price = q.price;
+  const lead = ev ? `${STRATS[k]}: signal ${when(ev.time)} på ${fmt(ev.price)} ${curOf(ev.ticker)}. Stop ${fmt(ev.stop)}, target ${fmt(ev.target)}.`
+    : pos ? (addEvent ? `Turtle-påfyllning i ${esc(pos.name)}. Stoppen flyttas upp vid nästa körning.` : `Lägg till fler aktier i ${esc(pos.name)}. GAV räknas om.`)
+    : "Fyll i det du köpte i Avanza.";
+  openSheet(`
+    <h3>${pos ? (addEvent ? "Registrera påfyllning" : "Köp mer") : "Registrera köp"}</h3><p class="lead">${lead}</p>
+    <form id="f">
+      ${pos ? "" : `<div class="cols">
+        ${field("tk", "Ticker", ticker ? short(ticker) : "", `autocapitalize="characters" autocomplete="off" required placeholder="VOLV B"`)}
+        <div class="field"><label for="mk">Marknad</label><select id="mk"><option value="se">Sverige</option><option value="us">USA</option></select></div>
+      </div>
+      ${field("nm", "Namn", name, `placeholder="Volvo B"`)}
+      <div class="field"><label>Strategi</label><div class="seg" id="strat">
+        ${Object.entries(STRATS).map(([v, l]) => `<button type="button" data-k="${v}" aria-pressed="${k === v}">${l}</button>`).join("")}</div></div>`}
+      <div class="cols">
+        ${field("qty", "Antal", qty ? String(qty) : "", `${numAttrs} required placeholder="100"`, qty ? "Förslag från signalen" : "")}
+        ${field("pr", "Kurs per aktie", price ? String(+(+price).toFixed(4)).replace(".", ",") : "", `${numAttrs} required`)}
+      </div>
+      <div class="cols">
+        ${field("fee", "Courtage", cfg.fee ? String(cfg.fee).replace(".", ",") : "0", numAttrs)}
+        ${field("tm", "Tid", localNow(), `type="datetime-local" required`)}
+      </div>
+      <div class="preview" id="pv"></div>
+      <div class="sheet-actions"><button type="button" class="btn" data-close>Avbryt</button><button class="btn primary" id="save">Spara köp</button></div>
+    </form>`, root => {
+    if (ticker && !pos) root.querySelector("#mk").value = marketOf(ticker);
+    root.querySelectorAll("#strat button").forEach(b => b.onclick = () => {
+      k = b.dataset.k; root.querySelectorAll("#strat button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    });
+    const pv = root.querySelector("#pv");
+    const upd = () => {
+      const qty = num(root.querySelector("#qty").value), pr = num(root.querySelector("#pr").value), fee = num(root.querySelector("#fee").value) || 0;
+      const cur = pos ? curOf(pos.ticker) : (root.querySelector("#mk").value === "us" ? "$" : "kr");
+      pv.innerHTML = qty > 0 && pr > 0 ? `<div><span>Totalt</span><b>${money(qty * pr + fee, cur, 2)}</b></div>` : `<div><span>Totalt</span><span>–</span></div>`;
+    };
+    root.querySelectorAll("input,select").forEach(i => i.addEventListener("input", upd)); upd();
+    root.querySelector("#f").onsubmit = async e => {
+      e.preventDefault();
+      const qty = num(root.querySelector("#qty").value), pr = num(root.querySelector("#pr").value);
+      const fee = num(root.querySelector("#fee").value) || 0, time = root.querySelector("#tm").value;
+      if (!(qty > 0) || !(pr > 0)) return toast("Fyll i antal och kurs.", true);
+      cfg.fee = fee; saveCfg();
+      const fill = { time, qty, price: pr, fee, ...(addEvent ? { signal_id: addEvent } : {}) };
+      if (pos) {
+        await save(d => d.open.find(p => p.id === pos.id).buys.push(fill), `Köp mer ${short(pos.ticker)}`, addEvent ? "Påfyllning registrerad" : "Köp registrerat");
+        return;
+      }
+      const mk = root.querySelector("#mk").value;
+      let t = root.querySelector("#tk").value.trim().toUpperCase();
+      if (!t) return toast("Fyll i ticker.", true);
+      t = mk === "se" ? (t.endsWith(".ST") ? t : t.replace(/\s+/g, "-") + ".ST") : t.replace(/[.\s]/g, "-");
+      const nm = root.querySelector("#nm").value.trim() || short(t);
+      const p = { id: "p_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), ticker: t, name: nm,
+        market: mk, strategy: k, opened: time, buys: [fill], sells: [], stop_override: null, target_override: null,
+        plan_stop: stop != null && stop !== "" ? +stop : null, plan_target: target != null && target !== "" ? +target : null,
+        signal_id: ev ? ev.id : null, atr: atr ? +atr : (ev && ev.atr) || null };
+      await save(d => d.open.push(p), `Köp ${short(t)}`, "Köp registrerat");
+    };
+  });
+}
+
+function sellSheet(posId, price) {
+  const p = D.positions.open.find(x => x.id === posId);
+  if (!p) return toast("Innehavet finns inte längre.", true);
+  const s = stats(p), cur = curOf(p.ticker), q = quote(p.ticker);
+  if (!price && q) price = q.price;
+  openSheet(`
+    <h3>Sälj ${esc(p.name || short(p.ticker))}</h3>
+    <p class="lead">Du äger ${fmt(s.qty, 0)} st med GAV ${fmt(s.gav)} ${cur}.</p>
+    <form id="f">
+      <div class="cols">
+        ${field("qty", "Antal sålda", String(s.qty), `${numAttrs} required`, `<button type="button" class="link" id="all">Hela innehavet</button>`)}
+        ${field("pr", "Kurs per aktie", price ? String(+(+price).toFixed(4)).replace(".", ",") : "", `${numAttrs} required`)}
+      </div>
+      <div class="cols">
+        ${field("fee", "Courtage", cfg.fee ? String(cfg.fee).replace(".", ",") : "0", numAttrs)}
+        ${field("tm", "Tid", localNow(), `type="datetime-local" required`)}
+      </div>
+      <div class="preview" id="pv"></div>
+      <div class="sheet-actions"><button type="button" class="btn" data-close>Avbryt</button><button class="btn primary" id="save">Spara försäljning</button></div>
+    </form>`, root => {
+    const pv = root.querySelector("#pv");
+    root.querySelector("#all").onclick = () => { root.querySelector("#qty").value = s.qty; upd(); };
+    const upd = () => {
+      const qty = Math.min(num(root.querySelector("#qty").value), s.qty), pr = num(root.querySelector("#pr").value), fee = num(root.querySelector("#fee").value) || 0;
+      if (!(qty > 0 && pr > 0)) { pv.innerHTML = "<div><span>Resultat</span><span>–</span></div>"; return; }
+      const r = qty * (pr - s.gav) - fee;
+      pv.innerHTML = `<div><span>Resultat</span><b class="${cls(r)}">${signed(r, cur, 2)} (${pct(r / (qty * s.gav))})</b></div>
+        <div><span>Kvar efter försäljning</span><span>${qty >= s.qty ? "Positionen stängs" : fmt(s.qty - qty, 0) + " st"}</span></div>`;
+    };
+    root.querySelectorAll("input").forEach(i => i.addEventListener("input", upd)); upd();
+    root.querySelector("#f").onsubmit = async e => {
+      e.preventDefault();
+      const qty = num(root.querySelector("#qty").value), pr = num(root.querySelector("#pr").value);
+      const fee = num(root.querySelector("#fee").value) || 0, time = root.querySelector("#tm").value;
+      if (!(qty > 0) || !(pr > 0)) return toast("Fyll i antal och kurs.", true);
+      if (qty > s.qty + 1e-9) return toast(`Du äger bara ${fmt(s.qty, 0)} st.`, true);
+      cfg.fee = fee; saveCfg();
+      await save(d => {
+        const i = d.open.findIndex(x => x.id === posId);
+        if (i < 0) throw new Error("Innehavet finns inte längre.");
+        const pos = d.open[i];
+        pos.sells.push({ time, qty, price: pr, fee });
+        if (stats(pos).qty <= 1e-9) { pos.closed = time; d.open.splice(i, 1); d.closed.push(pos); }
+      }, `Sälj ${short(p.ticker)}`, qty >= s.qty ? "Försäljning registrerad, positionen är stängd" : "Försäljning registrerad");
+    };
+  });
+}
+
+function editSheet(posId) {
+  const p = D.positions.open.find(x => x.id === posId);
+  if (!p) return;
+  const lv = levelsFor(p), cur = curOf(p.ticker);
+  const v = x => x == null ? "" : String(+(+x).toFixed(4)).replace(".", ",");
+  openSheet(`
+    <h3>Ändra ${esc(p.name || short(p.ticker))}</h3>
+    <p class="lead">Lämna stop eller target tomt för att låta boten räkna fram och flytta dem automatiskt.</p>
+    <form id="f">
+      <div class="cols">
+        ${field("st", `Stop (${cur})`, v(p.stop_override), `${numAttrs} placeholder="${v(lv.autoStop) || "auto"}"`, lv.autoStop != null ? `Auto: ${fmt(lv.autoStop)}` : "")}
+        ${field("tg", `Target (${cur})`, v(p.target_override), `${numAttrs} placeholder="${v(lv.autoTarget) || "auto"}"`, lv.autoTarget != null ? `Auto: ${fmt(lv.autoTarget)}` : "")}
+      </div>
+      ${field("nm", "Namn", p.name)}
+      <div class="field"><label>Strategi</label><div class="seg" id="strat">
+        ${Object.entries(STRATS).map(([v, l]) => `<button type="button" data-k="${v}" aria-pressed="${stratOf(p) === v}">${l}</button>`).join("")}</div>
+        <div class="hint">Styr hur boten följer upp innehavet: exit-regler och om stoppen flyttas.</div></div>
+      <div class="sheet-actions"><button type="button" class="btn" data-close>Avbryt</button><button class="btn primary">Spara ändringar</button></div>
+      <div class="danger-zone"><button type="button" class="btn sell wide" id="del">Ta bort registreringen</button>
+        <p class="rail-note">Använd bara om köpet registrerades av misstag. Sålda aktier registrerar du med Sälj.</p></div>
+    </form>`, root => {
+    let k = stratOf(p);
+    root.querySelectorAll("#strat button").forEach(b => b.onclick = () => {
+      k = b.dataset.k; root.querySelectorAll("#strat button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    });
+    root.querySelector("#f").onsubmit = async e => {
+      e.preventDefault();
+      const st = root.querySelector("#st").value.trim(), tg = root.querySelector("#tg").value.trim();
+      const nm = root.querySelector("#nm").value.trim();
+      await save(d => {
+        const x = d.open.find(y => y.id === posId);
+        x.stop_override = st ? num(st) : null; x.target_override = tg ? num(tg) : null;
+        if (nm) x.name = nm;
+        x.strategy = k;
+      }, `Ändra ${short(p.ticker)}`, "Ändringarna är sparade");
+    };
+    root.querySelector("#del").onclick = async () => {
+      if (!confirm(`Ta bort registreringen av ${p.name || short(p.ticker)}? Det går inte att ångra.`)) return;
+      await save(d => { d.open = d.open.filter(y => y.id !== posId); }, `Ta bort ${short(p.ticker)}`, "Registreringen är borttagen");
+    };
+  });
+}
+
+function settingsSheet() {
+  openSheet(`
+    <h3>Koppla GitHub</h3>
+    <p class="lead">Uppgifterna sparas bara i den här webbläsaren. Se README för hur du skapar en token.</p>
+    <form id="f">
+      <div class="cols">
+        ${field("ow", "Användarnamn", cfg.owner, `autocapitalize="none" autocomplete="off" required placeholder="jonas"`)}
+        ${field("rp", "Repo", cfg.repo, `autocapitalize="none" autocomplete="off" required placeholder="aktiescreener"`)}
+      </div>
+      ${field("tk", "Token", cfg.token, `type="password" autocomplete="off" required placeholder="github_pat_…"`, "Fine-grained token med åtkomst till bara det här repot och behörigheten Contents: Read and write.")}
+      <div class="sheet-actions"><button type="button" class="btn" data-close>Avbryt</button><button class="btn primary">Spara och anslut</button></div>
+    </form>`, root => {
+    root.querySelector("#f").onsubmit = async e => {
+      e.preventDefault();
+      cfg.owner = root.querySelector("#ow").value.trim(); cfg.repo = root.querySelector("#rp").value.trim();
+      cfg.token = root.querySelector("#tk").value.trim(); saveCfg();
+      closeSheet(); await refresh();
+      if (!loadError || loadError === "nobranch") toast("Ansluten");
+    };
+  });
+}
+
+async function save(fn, message, okText) {
+  const btn = sheet.querySelector("#save") || sheet.querySelector("button.primary");
+  if (btn) { btn.disabled = true; btn.textContent = "Sparar…"; }
+  try {
+    await mutatePositions(fn, message);
+    closeSheet(); render(); toast(okText);
+  } catch (err) {
+    toast(err.message, true);
+    if (btn) { btn.disabled = false; btn.textContent = "Försök igen"; }
+  }
+}
+
+/* =====================================================================
+   Händelser
+   ===================================================================== */
+let toastTimer;
+function toast(msg, err = false) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.className = "toast show" + (err ? " err" : "");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.className = "toast", err ? 5000 : 2600);
+}
+document.querySelector("nav.tabs").addEventListener("click", e => {
+  const b = e.target.closest("button[data-tab]"); if (!b) return;
+  tab = b.dataset.tab; history.replaceState(null, "", `?tab=${tab}${qs.get("api") ? "&api=" + encodeURIComponent(qs.get("api")) : ""}`);
+  render(); window.scrollTo(0, 0);
+});
+document.addEventListener("click", e => {
+  if (e.target.closest("[data-close]")) return closeSheet();
+  const f = e.target.closest("[data-filter]"); if (f) { histFilter = f.dataset.filter; return render(); }
+  const a = e.target.closest("[data-act]"); if (!a) return;
+  const { act, id, price } = a.dataset;
+  if (act === "settings") return settingsSheet();
+  if (cfgMissing()) return settingsSheet();
+  if (act === "buy") buySheet();
+  if (act === "buymore") buySheet({ posId: id });
+  if (act === "sell") sellSheet(id, price ? +price : null);
+  if (act === "edit") editSheet(id);
+  if (act === "buyevent") { const ev = D.events.find(x => x.id === id);
+    buySheet({ ticker: ev.ticker, name: ev.name, price: ev.price, atr: ev.atr, event: ev.id }); }
+  if (act === "addevent") { const ev = D.events.find(x => x.id === id);
+    buySheet({ posId: ev.pos_id, price: ev.price, addEvent: ev.id }); }
+});
+const cfgMissing = () => !cfg.owner || !cfg.repo || !cfg.token;
+document.getElementById("openSettings").onclick = settingsSheet;
+document.getElementById("refresh").onclick = () => refresh();
+
+async function refresh() {
+  const b = document.getElementById("refresh"); b.classList.add("spin");
+  try { await loadAll(); } catch (e) { loadError = e.message; }
+  b.classList.remove("spin"); render();
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden && !scrim.classList.contains("open")) refresh(); });
+
+/* Djuplänkar från notiserna: ?buy=…  ?sell=…  ?tab=… */
+(async () => {
+  render();
+  await refresh();
+  const deep = qs.get("buy") || qs.get("sell") || qs.get("buymore");
+  if (cfgMissing() && deep) return settingsSheet();
+  if (qs.get("buy")) buySheet({ ticker: qs.get("buy"), name: qs.get("name") || "", price: qs.get("price") || "",
+    atr: qs.get("atr"), event: qs.get("event"), strategy: qs.get("strategy"), stop: qs.get("stop"),
+    target: qs.get("target"), qty: qs.get("qty") });
+  else if (qs.get("buymore")) {
+    const addEv = (D.events || []).find(x => x.add && x.pos_id === qs.get("buymore") && !(openPositions().find(p => p.id === x.pos_id)?.buys || []).some(b => b.signal_id === x.id));
+    buySheet({ posId: qs.get("buymore"), price: qs.get("price") || "", qty: qs.get("qty"), addEvent: addEv ? addEv.id : "deeplink" });
+  }
+  else if (qs.get("sell")) sellSheet(qs.get("sell"), qs.get("price") ? +qs.get("price") : null);
+  if (deep) history.replaceState(null, "", `?tab=${tab}${qs.get("api") ? "&api=" + encodeURIComponent(qs.get("api")) : ""}`);
+})();
+</script>
+</body>
+</html>
