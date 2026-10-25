@@ -231,14 +231,22 @@ details.report:last-child { border-bottom: 0; }
    Konfiguration (sparas bara i den här webbläsaren)
    ===================================================================== */
 const CFG_KEY = "screener.cfg";
-const cfg = Object.assign({ owner: "", repo: "", token: "", branch: "data", api: "https://api.github.com", fee: 0 },
-  safeJSON(lsGet(CFG_KEY)) || {});
+const GITHUB_API = "https://api.github.com";
+const storedCfg = safeJSON(lsGet(CFG_KEY)) || {};
+const cfg = Object.assign({ owner: "", repo: "", token: "", branch: "data", fee: 0 }, storedCfg);
+cfg.api = GITHUB_API;   // säkerhet: en sparad API-adress används aldrig, token går bara till GitHub
 const qs = new URLSearchParams(location.search);
-if (qs.get("api")) cfg.api = qs.get("api");   // för lokal test
+if (qs.get("api") && apiOverrideAllowed(qs.get("api"), location)) cfg.api = qs.get("api");   // bara lokal test
+if ("api" in storedCfg) saveCfg();   // städa bort en tidigare sparad adress
+function apiOverrideAllowed(param, loc) {
+  // ?api= får bara peka om anropen när sidan körs lokalt och målet också är lokalt (tester).
+  const local = h => h === "localhost" || h === "127.0.0.1";
+  try { return local(loc.hostname) && local(new URL(param).hostname); } catch { return false; }
+}
 function lsGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
 function lsSet(k, v) { try { localStorage.setItem(k, v); } catch {} }
 function safeJSON(s) { try { return JSON.parse(s); } catch { return null; } }
-function saveCfg() { lsSet(CFG_KEY, JSON.stringify(cfg)); }
+function saveCfg() { const { api, ...keep } = cfg; lsSet(CFG_KEY, JSON.stringify(keep)); }   // api sparas aldrig
 
 /* =====================================================================
    GitHub-lagring: JSON-filer i grenen "data"
@@ -261,6 +269,7 @@ function b64encode(str) {
   return btoa(bin);
 }
 async function gh(path, opts = {}) {
+  if (cfg.api !== GITHUB_API && !apiOverrideAllowed(cfg.api, location)) throw new Error("Otillåten API-adress");
   const res = await fetch(`${cfg.api}/repos/${cfg.owner}/${cfg.repo}/contents/${path}`, {
     ...opts, cache: "no-store",
     headers: { "Authorization": `Bearer ${cfg.token}`, "Accept": "application/vnd.github+json",
