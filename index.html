@@ -340,6 +340,21 @@ function stats(p) {
 const fx = () => (D.prices.fx && D.prices.fx.USDSEK) || 0;
 const toSek = (v, t) => marketOf(t) === "us" ? v * fx() : v;
 const quote = t => (D.prices.quotes || {})[t];
+function tickerTips(t) {
+  // Tickers med kurs som liknar den inskrivna: samma början eller ett tecken fel (CAMAX → CAMX, MCOV → MCOV-B).
+  const base = x => x.replace(/\.ST$/, "");
+  const dist = (a, b) => {
+    const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+    for (let j = 1; j <= b.length; j++) d[0][j] = j;
+    for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++)
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    return d[a.length][b.length];
+  };
+  const b = base(t), b0 = b.split("-")[0];
+  return Object.keys(D.prices.quotes || {}).filter(k => k !== t && (quote(k) || {}).price)
+    .filter(k => { const kb = base(k), k0 = kb.split("-")[0]; return k0 === b0 || dist(k0, b0) <= 1 || dist(kb, b) <= 1; })
+    .slice(0, 4);
+}
 function levelsFor(p) {
   const lv = D.levels[p.id] || {};
   return { stop: p.stop_override ?? lv.stop ?? null, target: p.target_override ?? lv.target ?? null,
@@ -673,6 +688,16 @@ function buySheet({ ticker = "", name = "", price = "", atr = null, event = null
       if (!t) return toast("Fyll i ticker.", true);
       t = mk === "se" ? (t.endsWith(".ST") ? t : t.replace(/\s+/g, "-") + ".ST") : t.replace(/[.\s]/g, "-");
       const nm = root.querySelector("#nm").value.trim() || short(t);
+      if (mk === "se" && !(quote(t) || {}).price && root.dataset.confirmed !== t) {
+        // Okänd ticker: boten får ingen kurs, och positionen saknas i rapporten. Bekräfta först.
+        root.dataset.confirmed = t;
+        const tips = tickerTips(t);
+        pv.innerHTML = `<div style="color:var(--loss);display:block">Boten har ingen kurs för <b>${esc(t)}</b>. Kontrollera tickern i Avanza – ` +
+          `en felstavad ticker gör att innehavet saknar kurs och inte kommer med i rapporten.` +
+          (tips.length ? ` Menade du ${tips.map(x => `<b>${esc(short(x))}</b>`).join(" eller ")}?` : "") + `</div>`;
+        root.querySelector("#save").textContent = "Spara ändå";
+        return;
+      }
       const p = { id: "p_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), ticker: t, name: nm,
         market: mk, strategy: k, opened: time, buys: [fill], sells: [], stop_override: null, target_override: null,
         plan_stop: stop != null && stop !== "" ? +stop : null, plan_target: target != null && target !== "" ? +target : null,
